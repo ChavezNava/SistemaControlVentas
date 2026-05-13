@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin conexión - Sistema de Ventas</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .offline-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+        }
+        
+        .offline-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        
+        .offline-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .offline-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        .offline-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .offline-info {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">
+            <i class="fas fa-wifi-slash"></i>
+        </div>
+        
+        <h1 class="offline-title">Sin conexión a internet</h1>
+        
+        <p class="offline-message">
+            El sistema de ventas no puede establecer conexión con el servidor. 
+            Puedes seguir trabajando con los datos locales y se sincronizarán 
+            automáticamente cuando se restablezca la conexión.
+        </p>
+        
+        <div class="offline-actions">
+            <button onclick="location.reload()" class="btn btn-primary">
+                <i class="fas fa-redo"></i> Reintentar conexión
+            </button>
+            
+            <button onclick="window.location.href = '/'" class="btn btn-success">
+                <i class="fas fa-home"></i> Ir al inicio
+            </button>
+        </div>
+        
+        <div class="offline-info">
+            <p>
+                <i class="fas fa-info-circle"></i>
+                Los datos se guardan localmente en tu dispositivo. 
+                Asegúrate de crear respaldos regularmente.
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Verificar conexión periódicamente
+        setInterval(() => {
+            if (navigator.onLine) {
+                window.location.href = '/';
+            }
+        }, 5000);
+        
+        // Escuchar cambios en la conexión
+        window.addEventListener('online', () => {
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Sistema de Control de Ventas - Gestión completa de productos, ventas, reinversión y respaldo de datos">
+    <meta name="keywords" content="ventas, inventario, gestión, productos, categorías, reinversión, respaldo, compras">
+    <meta name="author" content="Sistema de Ventas">
+    
+    <!-- PWA Metadata -->
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VentasApp">
+    <meta name="application-name" content="VentasApp">
+    <meta name="msapplication-TileColor" content="#2c3e50">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" href="icons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <title>Sistema de Ventas - Gestión Dinámica</title>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>
+                    <span class="mobile-only">🏪</span>
+                    <span class="desktop-only">🏪 Sistema de Control de Ventas</span>
+                    <span class="tablet-only">🏪 Sistema Ventas</span>
+                </h1>
+                <p class="subtitle">
+                    <span class="desktop-only">Gestión Dinámica de Productos, Ventas y Compras</span>
+                    <span class="mobile-only">Control de ventas y compras</span>
+                </p>
+                <div class="date-display">
+                    <span id="currentDate"></span>
+                    <span id="currentTime"></span>
+                </div>
+            </div>
+        </header>
+        
+        <div id="notification" class="notification hidden">
+            <span id="notificationMessage"></span>
+            <button onclick="hideNotification()" class="notification-close">×</button>
+        </div>
+        
+        <div class="tabs-wrapper">
+            <div class="tabs" id="mainTabs">
+                <div class="tab active" data-tab="sales">
+                    <i class="fas fa-cash-register"></i>
+                    <span class="tab-text">Ventas</span>
+                </div>
+                <div class="tab" data-tab="summary">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="tab-text">Resumen</span>
+                </div>
+                <div class="tab" data-tab="products">
+                    <i class="fas fa-boxes"></i>
+                    <span class="tab-text">Productos</span>
+                </div>
+                <div class="tab" data-tab="history">
+                    <i class="fas fa-history"></i>
+                    <span class="tab-text">Historial</span>
+                </div>
+                <div class="tab" data-tab="management">
+                    <i class="fas fa-tools"></i>
+                    <span class="tab-text">Gestión</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content active" id="sales-tab">
+            <div class="app-body">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="card-title-text">Productos</span>
+                        </h2>
+                        <div class="card-actions">
+                            <button class="btn btn-small btn-info mobile-compact" onclick="showAddProductModal()" title="Agregar Producto">
+                                <i class="fas fa-plus"></i>
+                                <span class="btn-text">Agregar</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="category-tabs-wrapper">
+                        <div class="tabs" data-category-container>
+                        </div>
+                    </div>
+                    
+                    <div class="search-box">
+                        <input type="text" id="productSearch" placeholder="🔍 Buscar producto..." onkeyup="filterProducts()" aria-label="Buscar producto">
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-receipt"></i>
+                            <span class="card-title-text">Registrar Venta</span>
+                            <span class="sale-counter" id="todaySalesCount">Hoy: 0</span>
+                        </h2>
+                    </div>
+                    
+                    <form class="sale-form" id="saleForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productSelect">
+                                    <i class="fas fa-cube"></i> Producto
+                                </label>
+                                <select id="productSelect" required aria-label="Seleccionar producto">
+                                    <option value="">Selecciona un producto</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="quantity">
+                                    <i class="fas fa-hashtag"></i> Cantidad
+                                </label>
+                                <input type="number" id="quantity" min="1" value="1" required aria-label="Cantidad">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="salePrice">
+                                    <i class="fas fa-tag"></i> Precio Venta
+                                </label>
+                                <input type="number" id="salePrice" step="0.01" min="0" required aria-label="Precio de venta">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="purchasePrice">
+                                    <i class="fas fa-shopping-cart"></i> Precio Compra (Reinversión)
+                                </label>
+                                <input type="number" id="purchasePrice" step="0.01" min="0" readonly class="readonly-input" aria-label="Precio de compra">
+                            </div>
+                        </div>
+                        
+                        <div class="sale-summary">
+                            <div class="summary-item">
+                                <span>Total Venta:</span>
+                                <span id="saleTotal">$0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Reinversión:</span>
+                                <span id="saleReinvestment" class="text-warning">$0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Ganancia:</span>
+                                <span id="saleProfit" class="text-success">$0.00</span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-large full-width-mobile">
+                            <i class="fas fa-check"></i>
+                            <span class="btn-text">Registrar Venta</span>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-list-alt"></i>
+                            <span class="card-title-text">Ventas de Hoy</span>
+                        </h2>
+                        <div class="card-actions">
+                            <button class="btn btn-small btn-danger mobile-compact" onclick="clearTodaySales()" title="Limpiar ventas de hoy">
+                                <i class="fas fa-trash"></i>
+                                <span class="btn-text">Limpiar</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sales-list" id="todaySales">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="summary-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-pie"></i>
+                        <span class="card-title-text">Resumen del Día</span>
+                    </h2>
+                </div>
+                
+                <div class="summary-grid">
+                    <div class="summary-card sales">
+                        <div class="summary-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="summary-value" id="totalSold">0</div>
+                        <div class="summary-label">Vendido</div>
+                        <div class="summary-subtitle">unidades</div>
+                    </div>
+                    
+                    <div class="summary-card revenue">
+                        <div class="summary-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="summary-value" id="totalAmount">$0.00</div>
+                        <div class="summary-label">Monto</div>
+                        <div class="summary-subtitle">total</div>
+                    </div>
+                    
+                    <div class="summary-card profit">
+                        <div class="summary-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="summary-value" id="totalProfit">$0.00</div>
+                        <div class="summary-label">Ganancia</div>
+                        <div class="summary-subtitle">bruta</div>
+                    </div>
+                    
+                    <div class="summary-card top-product">
+                        <div class="summary-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="summary-value" id="topProduct">-</div>
+                        <div class="summary-label">Top</div>
+                        <div class="summary-subtitle">producto</div>
+                    </div>
+                </div>
+                
+                <div class="card mt-2">
+                    <h3 class="card-subtitle">
+                        <i class="fas fa-chart-bar"></i>
+                        <span class="card-subtitle-text">Ventas por Categoría</span>
+                    </h3>
+                    <div class="chart-container" id="categoryChartsContainer">
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h3 class="card-subtitle">
+                        <i class="fas fa-table"></i>
+                        <span class="card-subtitle-text">Detalle por Producto</span>
+                    </h3>
+                    <div id="productDetails" class="table-responsive">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="products-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-box-open"></i>
+                        <span class="card-title-text">Inventario</span>
+                    </h2>
+                    <div class="card-actions">
+                        <button class="btn btn-success mobile-compact" onclick="showAddProductModal()" title="Nuevo Producto">
+                            <i class="fas fa-plus"></i>
+                            <span class="btn-text">Nuevo</span>
+                        </button>
+                        <button class="btn btn-info mobile-compact" onclick="refreshProducts()" title="Actualizar">
+                            <i class="fas fa-sync"></i>
+                            <span class="btn-text">Actualizar</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="inventory-controls">
+                    <div class="search-box">
+                        <input type="text" id="inventorySearch" placeholder="🔍 Buscar producto..." onkeyup="filterInventory()" aria-label="Buscar en inventario">
+                    </div>
+                    <select id="categoryFilter" onchange="filterInventory()" aria-label="Filtrar por categoría">
+                        <option value="all">Todas</option>
+                    </select>
+                </div>
+                
+                <div id="productsInventory" class="table-responsive">
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="history-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-history"></i>
+                        <span class="card-title-text">Historial</span>
+                    </h2>
+                </div>
+                
+                <div class="history-controls">
+                    <div class="form-group">
+                        <label for="historyDate">Fecha:</label>
+                        <input type="date" id="historyDate" onchange="loadHistory()" aria-label="Seleccionar fecha">
+                    </div>
+                    <button class="btn btn-info full-width-mobile" onclick="loadHistory()">
+                        <i class="fas fa-search"></i>
+                        <span class="btn-text">Buscar</span>
+                    </button>
+                </div>
+                
+                <div id="salesHistory">
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="management-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-tools"></i>
+                        <span class="card-title-text">Gestión</span>
+                    </h2>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 class="card-subtitle">
+                            <i class="fas fa-calendar-plus"></i>
+                            <span>Históricas</span>
+                        </h3>
+                        <p class="card-description">Ventas de días pasados</p>
+                        <button id="showManualSaleBtn" class="btn btn-primary full-width-mobile">
+                            <i class="fas fa-plus-circle"></i>
+                            <span class="btn-text">Agregar</span>
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="card-subtitle">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Reportes</span>
+                        </h3>
+                        <p class="card-description">Ventas por período</p>
+                        <button id="showPeriodSearchBtn" class="btn btn-info full-width-mobile">
+                            <i class="fas fa-search"></i>
+                            <span class="btn-text">Buscar</span>
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="card-subtitle">
+                            <i class="fas fa-tags"></i>
+                            <span>Categorías</span>
+                        </h3>
+                        <p class="card-description">Gestionar categorías</p>
+                        <button onclick="window.salesSystem.categoryManager.showManageCategoriesModal()" class="btn btn-warning full-width-mobile">
+                            <i class="fas fa-cog"></i>
+                            <span class="btn-text">Gestionar</span>
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="card-subtitle">
+                            <i class="fas fa-database"></i>
+                            <span>Respaldo</span>
+                        </h3>
+                        <p class="card-description">Respaldo y restauración</p>
+                        <button onclick="showBackupManager()" class="btn btn-primary full-width-mobile">
+                            <i class="fas fa-hdd"></i>
+                            <span class="btn-text">Gestionar</span>
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="card-subtitle">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Compras</span>
+                        </h3>
+                        <p class="card-description">Gestión de inventario y presupuesto</p>
+                        <div class="budget-info mb-2">
+                            <div class="budget-item">
+                                <span>Presupuesto Inicial:</span>
+                                <span id="initialBudget" class="budget-amount">$0.00</span>
+                                <button class="btn btn-small btn-info" onclick="showInitialBudgetModal()">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                            <div class="budget-item">
+                                <span>Efectivo Disponible:</span>
+                                <span id="availableBudget" class="budget-amount text-success">$0.00</span>
+                                <button class="btn btn-small btn-warning" onclick="showManualBudgetAdjustModal()">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </button>
+                            </div>
+                            <div class="budget-note">
+                                <small>Fórmula: Presupuesto Inicial + Ventas - Reinversión</small>
+                                <small class="text-info">(Puedes ajustar el efectivo disponible manualmente)</small>
+                            </div>
+                        </div>
+                        <div class="tool-grid">
+                            <button onclick="showPurchaseModal()" class="btn btn-primary mobile-compact">
+                                <i class="fas fa-plus-circle"></i>
+                                <span class="btn-text">Registrar Compra</span>
+                            </button>
+                            <button onclick="showCategoryPurchaseStats()" class="btn btn-info mobile-compact">
+                                <i class="fas fa-chart-pie"></i>
+                                <span class="btn-text">Reporte por Categoría</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="card-subtitle">
+                            <i class="fas fa-toolbox"></i>
+                            <span>Herramientas</span>
+                        </h3>
+                        <div class="tool-grid">
+                            <button onclick="clearTodaySales()" class="btn btn-warning mobile-compact" title="Limpiar ventas de hoy">
+                                <i class="fas fa-broom"></i>
+                                <span class="btn-text">Limpiar</span>
+                            </button>
+                            <button onclick="refreshProducts()" class="btn btn-success mobile-compact" title="Actualizar productos">
+                                <i class="fas fa-sync"></i>
+                                <span class="btn-text">Actualizar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Historial de Compras -->
+                <div class="card mt-3">
+                    <h3 class="card-subtitle">
+                        <i class="fas fa-history"></i>
+                        <span>Historial de Compras</span>
+                    </h3>
+                    <div id="purchaseHistory" class="purchase-history">
+                    </div>
+                </div>
+                
+                <div class="stats-grid mt-3">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-value" id="totalSalesStat">0</div>
+                        <div class="stat-label">Ventas</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-value" id="totalProductsStat">0</div>
+                        <div class="stat-label">Productos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-value" id="totalDaysStat">0</div>
+                        <div class="stat-label">Días</div>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <h3 class="card-subtitle">
+                        <i class="fas fa-history"></i>
+                        <span>Ventas Recientes</span>
+                    </h3>
+                    <div id="recentSales" class="recent-sales">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>
+                <i class="fas fa-database"></i>
+                <span class="footer-text">Sistema de Ventas © 2025</span>
+            </p>
+        </footer>
+    </div>
+    
+    <!-- Modal para agregar producto -->
+    <div id="productModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-plus-circle"></i>
+                    <span id="modalTitle">Nuevo Producto</span>
+                </h3>
+                <button class="modal-close" onclick="closeProductModal()" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="editProductId">
+                    
+                    <div class="form-group">
+                        <label for="productName">Nombre *</label>
+                        <input type="text" id="productName" required aria-label="Nombre del producto">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productCategory">Categoría *</label>
+                            <select id="productCategory" required aria-label="Categoría del producto">
+                                <option value="">Seleccionar</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productStock">Stock</label>
+                            <input type="number" id="productStock" min="0" value="0" aria-label="Stock inicial">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productPurchasePrice">Precio Compra (Reinversión) *</label>
+                            <input type="number" id="productPurchasePrice" step="0.01" min="0" required aria-label="Precio de compra">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productSalePrice">Precio Venta *</label>
+                            <input type="number" id="productSalePrice" step="0.01" min="0" required aria-label="Precio de venta">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeProductModal()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para venta manual -->
+    <div id="manualSaleModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-calendar-plus"></i>
+                    <span>Venta Histórica</span>
+                </h3>
+                <button class="modal-close" onclick="closeManualSaleModal()" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="manualSaleForm">
+                    <div class="form-group">
+                        <label for="manualSaleDate">Fecha *</label>
+                        <input type="date" id="manualSaleDate" required class="form-control" aria-label="Fecha de la venta">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="manualProductSelect">Producto *</label>
+                        <select id="manualProductSelect" required class="form-control" onchange="onManualProductSelectChange(this.value)" aria-label="Seleccionar producto">
+                            <option value="">Selecciona producto</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="manualQuantity">Cantidad *</label>
+                            <input type="number" id="manualQuantity" min="1" value="1" required class="form-control" oninput="updateManualSaleSummary()" aria-label="Cantidad">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="manualSalePrice">Precio *</label>
+                            <input type="number" id="manualSalePrice" step="0.01" min="0" required class="form-control" oninput="updateManualSaleSummary()" aria-label="Precio de venta">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="manualPurchasePrice">Precio Compra (Reinversión)</label>
+                        <input type="number" id="manualPurchasePrice" step="0.01" min="0" required class="form-control" readonly aria-label="Precio de compra">
+                    </div>
+                    
+                    <div class="sale-summary">
+                        <div class="summary-item">
+                            <span>Total:</span>
+                            <span id="manualSaleTotal">$0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Reinversión:</span>
+                            <span id="manualSaleReinvestment" class="text-warning">$0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Ganancia:</span>
+                            <span id="manualSaleProfit" class="text-success">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeManualSaleModal()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para búsqueda por período -->
+    <div id="periodSearchModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-chart-line"></i>
+                    <span>Reporte por Período</span>
+                </h3>
+                <button class="modal-close" onclick="closePeriodSearchModal()" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="periodSearchForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="periodStartDate">Inicio *</label>
+                            <input type="date" id="periodStartDate" required class="form-control" aria-label="Fecha inicio">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="periodEndDate">Fin *</label>
+                            <input type="date" id="periodEndDate" required class="form-control" aria-label="Fecha fin">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closePeriodSearchModal()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generar
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="periodSearchResults" class="mt-3">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para ajuste manual de efectivo -->
+    <div id="manualBudgetAdjustModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-pencil-alt"></i>
+                    Ajustar Efectivo Disponible
+                </h3>
+                <button class="modal-close" onclick="closeManualBudgetAdjustModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="manualBudgetAdjustForm">
+                    <div class="form-group">
+                        <label for="currentAvailableBudget">Efectivo Actual</label>
+                        <input type="text" id="currentAvailableBudget" readonly class="form-control readonly-input" style="background-color: #e9ecef;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newAvailableBudget">Nuevo Efectivo *</label>
+                        <input type="number" id="newAvailableBudget" step="0.01" min="0" required class="form-control" placeholder="Ingresa el nuevo monto">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adjustmentNote">Motivo del ajuste</label>
+                        <textarea id="adjustmentNote" rows="2" class="form-control" placeholder="Ej: Depósito adicional, retiro de efectivo, etc."></textarea>
+                    </div>
+                    
+                    <div class="sale-summary">
+                        <div class="summary-item">
+                            <span>Presupuesto Inicial:</span>
+                            <span id="initialBudgetDisplay">$0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Ventas Totales:</span>
+                            <span id="totalSalesDisplay">$0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Reinversión Total:</span>
+                            <span id="totalReinvestmentDisplay">$0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Ajuste Manual:</span>
+                            <span id="manualAdjustmentDisplay" class="text-warning">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeManualBudgetAdjustModal()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Aplicar Ajuste
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Botón flotante para móviles -->
+    <div class="mobile-action-buttons">
+        <button class="mobile-action-btn primary" onclick="showAddProductModal()" title="Agregar Producto">
+            <i class="fas fa-plus"></i>
+        </button>
+        <button class="mobile-action-btn secondary" onclick="window.salesSystem.historyManager.showManualSaleModal()" title="Venta Histórica">
+            <i class="fas fa-calendar-plus"></i>
+        </button>
+    </div>
+    
+    <script src="modules/utils.js"></script>
+    <script src="modules/data-manager.js"></script>
+    <script src="modules/category-manager.js"></script>
+    <script src="modules/product-manager.js"></script>
+    <script src="modules/sales-manager.js"></script>
+    <script src="modules/history-manager.js"></script>
+    <script src="modules/ui-manager.js"></script>
+    <script src="modules/backup-manager.js"></script>
+    <script src="modules/purchase-manager.js"></script>
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado con éxito:', registration.scope);
+                        
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('Nueva versión del Service Worker encontrada');
+                            
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    if (window.salesSystem && window.salesSystem.showNotification) {
+                                        window.salesSystem.showNotification(
+                                            '¡Nueva versión disponible! Recarga la página para actualizar.',
+                                            'info'
+                                        );
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error registrando Service Worker:', error);
+                    });
+            });
+            
+            window.addEventListener('offline', () => {
+                console.log('Aplicación offline');
+                if (window.salesSystem && window.salesSystem.showNotification) {
+                    window.salesSystem.showNotification('Sin conexión a internet. Trabajando en modo offline.', 'warning');
+                }
+            });
+            
+            window.addEventListener('online', () => {
+                console.log('Aplicación online');
+                if (window.salesSystem && window.salesSystem.showNotification) {
+                    window.salesSystem.showNotification('Conexión a internet restablecida.', 'success');
+                }
+            });
+        }
+        
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        console.log('Permiso para notificaciones concedido');
+                    }
+                });
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', requestNotificationPermission);
+        
+        window.addEventListener('load', () => {
+            if (!navigator.onLine && window.salesSystem && window.salesSystem.showNotification) {
+                setTimeout(() => {
+                    window.salesSystem.showNotification('Aplicación cargada en modo offline', 'info');
+                }, 1000);
+            }
+        });
+        
+        function showManualBudgetAdjustModal() {
+            if (window.salesSystem && window.salesSystem.purchaseManager) {
+                window.salesSystem.purchaseManager.showManualBudgetAdjustModal();
+            }
+        }
+        
+        function closeManualBudgetAdjustModal() {
+            const modal = document.getElementById('manualBudgetAdjustModal');
+            if (modal) modal.remove();
+        }
+    </script>
+</body>
+
+</html>
