@@ -1,8 +1,13 @@
-// Módulo de Gestión de Ventas - CON MÚLTIPLES PRODUCTOS Y CARRITO
+// Módulo de Gestión de Ventas - CORREGIDO
 class SalesManager {
   constructor(salesSystem) {
     this.salesSystem = salesSystem;
     this.cart = [];
+  }
+  
+  registerSale() {
+    // Usar el carrito en lugar de venta directa
+    this.addToCart();
   }
   
   addToCart() {
@@ -172,7 +177,6 @@ class SalesManager {
   
   clearCart() {
     if (this.cart.length === 0) return;
-    
     if (confirm('¿Estás seguro de vaciar el carrito?')) {
       this.cart = [];
       this.renderCart();
@@ -186,7 +190,6 @@ class SalesManager {
       this.salesSystem.showNotification('El carrito está vacío', 'error');
       return;
     }
-    
     this.showSaleConfirmationModal();
   }
   
@@ -199,10 +202,7 @@ class SalesManager {
       <div id="saleConfirmModal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
           <div class="modal-header">
-            <h3>
-              <i class="fas fa-check-circle"></i>
-              Confirmar Venta
-            </h3>
+            <h3><i class="fas fa-check-circle"></i> Confirmar Venta</h3>
             <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
           </div>
           <div class="modal-body">
@@ -220,14 +220,9 @@ class SalesManager {
                 <div class="confirm-profit"><strong>Ganancia:</strong> <span class="text-success">$${totalProfit.toFixed(2)}</span></div>
               </div>
             </div>
-            
             <div class="form-actions mt-3">
-              <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">
-                <i class="fas fa-times"></i> Cancelar
-              </button>
-              <button type="button" class="btn btn-success" id="finalConfirmSaleBtn">
-                <i class="fas fa-check"></i> Confirmar Venta
-              </button>
+              <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancelar</button>
+              <button type="button" class="btn btn-success" id="finalConfirmSaleBtn">Confirmar Venta</button>
             </div>
           </div>
         </div>
@@ -357,7 +352,7 @@ class SalesManager {
         <div class="sale-item">
           <div class="sale-info">
             <div class="sale-product">
-              <span class="category-badge" style="background: ${category.color}; margin-right: 0.5rem; padding: 0.1rem 0.5rem;">
+              <span class="category-badge" style="background: ${category.color}; margin-right: 0.5rem;">
                 ${category.name}
               </span>
               ${sale.productName}

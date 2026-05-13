@@ -1,4 +1,4 @@
-// Módulo de Utilidades - CORREGIDO PARA ZONAS HORARIAS
+// Módulo de Utilidades - CORREGIDO
 class Utils {
   constructor() {}
   
@@ -11,7 +11,9 @@ class Utils {
   }
   
   formatDisplayDate(dateString) {
-    const date = new Date(dateString + 'T12:00:00');
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('-');
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('es-ES', {
       weekday: 'long',
       year: 'numeric',
@@ -20,24 +22,13 @@ class Utils {
     });
   }
   
-  parseDateInput(dateString) {
-    if (!dateString) return '';
-    
-    const date = new Date(dateString + 'T00:00:00Z');
-    const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-    
-    return this.getLocalDate(localDate);
-  }
-  
   parseInputDateToLocal(dateString) {
     if (!dateString) return '';
-    
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day);
     return this.getLocalDate(date);
   }
   
-  // Método estático: Generar color aleatorio para nuevas categorías
   static generateRandomColor() {
     const letters = '0123456789ABCDEF';
     let color = '#';
@@ -47,7 +38,6 @@ class Utils {
     return color;
   }
   
-  // Método estático: Obtener icono por defecto basado en el nombre de la categoría
   static getDefaultIcon(categoryName) {
     const iconMap = {
       'cigars': 'fa-smoking',
@@ -74,7 +64,6 @@ class Utils {
         return icon;
       }
     }
-    
     return iconMap.default;
   }
 }
